@@ -1,0 +1,6 @@
+L50 BOARD
+M:	Pawel Dembicki <paweldembicki@gmail.com>
+S:	Maintained
+F:	board/checkpoint/l-50/
+F:	include/configs/l-50.h
+F:	configs/l-50_defconfig

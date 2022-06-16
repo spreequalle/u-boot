@@ -17,6 +17,7 @@
 #define CONFIG_FEROCEON_88FR131	1	/* CPU Core subversion */
 #define CONFIG_KW88F6281	1	/* SOC Name */
 #define CONFIG_SKIP_LOWLEVEL_INIT	/* disable board lowlevel_init */
+#define CONFIG_SYS_MVFS
 
 /*
  * mv-common.h should be defined after CMD configs since it used them
@@ -37,19 +38,15 @@
  */
 #define CONFIG_BOOTCOMMAND \
 	"setenv bootargs ${console} ${mtdparts} ${bootargs_root}; "	\
-	"ubi part root; " \
-	"ubifsmount ubi:root; " \
-	"ubifsload 0x800000 ${kernel}; " \
-	"ubifsload 0x1100000 ${initrd}; " \
-	"bootm 0x800000 0x1100000"
+	"ubi part ubi; " \
+	"ubi read 0x800000 kernel; " \
+	"bootm 0x800000"
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"console=console=ttyS0,115200\0" \
-	"mtdids=nand0=orion_nand\0" \
-	"mtdparts="CONFIG_MTDPARTS_DEFAULT \
-	"kernel=/boot/uImage\0" \
-	"initrd=/boot/uInitrd\0" \
-	"bootargs_root=ubi.mtd=1 root=ubi0:root rootfstype=ubifs ro\0"
+	"console=console=ttyS0,115200\0"	\
+	"mtdids=nand0=orion_nand\0"		\
+	"mtdparts="CONFIG_MTDPARTS_DEFAULT "\0"	\
+	"bootargs_root=\0"
 
 /*
  * Ethernet Driver configuration
@@ -62,5 +59,7 @@
 /*
  * File system
  */
+
+#include "openwrt-kirkwood-common.h"
 
 #endif /* _CONFIG_DOCKSTAR_H */

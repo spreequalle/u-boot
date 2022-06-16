@@ -60,17 +60,15 @@
  */
 #define CONFIG_BOOTCOMMAND \
 	"setenv bootargs ${console} ${mtdparts} ${bootargs_root}; " \
-	"ubi part root; " \
-	"ubifsmount ubi:root; " \
-	"ubifsload 0x800000 ${kernel}; " \
+	"ubi part ubi; " \
+	"ubi read 0x800000 kernel; " \
 	"bootm 0x800000"
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"console=console=ttyS0,115200\0" \
 	"mtdids=nand0=orion_nand\0" \
-	"mtdparts="CONFIG_MTDPARTS_DEFAULT \
-	"kernel=/boot/uImage\0" \
-	"bootargs_root=ubi.mtd=root root=ubi0:root rootfstype=ubifs ro\0"
+	"mtdparts="CONFIG_MTDPARTS_DEFAULT "\0" \
+	"bootargs_root=\0"
 
 /*
  * Ethernet Driver configuration
@@ -86,5 +84,7 @@
 #ifdef CONFIG_MVSATA_IDE
 #define CONFIG_SYS_ATA_IDE0_OFFSET      MV_SATA_PORT0_OFFSET
 #endif /*CONFIG_MVSATA_IDE*/
+
+#include "openwrt-kirkwood-common.h"
 
 #endif /* _CONFIG_GOFLEXHOME_H */

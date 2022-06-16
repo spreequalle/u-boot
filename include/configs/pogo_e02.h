@@ -42,17 +42,17 @@
  * Default environment variables
  */
 #define CONFIG_BOOTCOMMAND \
-	"setenv bootargs $(bootargs_console); " \
-	"run bootcmd_usb; " \
-	"bootm 0x00800000 0x01100000"
+	"setenv bootargs ${console} ${mtdparts} ${bootargs_root}; "	\
+	"ubi part ubi; "						\
+	"ubifsmount ubi:rootfs; "					\
+	"ubi read 0x800000 kernel; "					\
+	"bootm 0x800000"
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"mtdparts=mtdparts=orion_nand:1M(u-boot),4M(uImage)," \
-	"32M(rootfs),-(data)\0"\
-	"mtdids=nand0=orion_nand\0"\
-	"bootargs_console=console=ttyS0,115200\0" \
-	"bootcmd_usb=usb start; ext2load usb 0:1 0x00800000 /uImage; " \
-	"ext2load usb 0:1 0x01100000 /uInitrd\0"
+	"console=console=ttyS0,115200\0"	\
+	"mtdids=nand0=orion_nand\0"		\
+	"mtdparts="CONFIG_MTDPARTS_DEFAULT "\0"	\
+	"bootargs_root=\0"
 
 /*
  * Ethernet Driver configuration
@@ -65,5 +65,7 @@
 /*
  * File system
  */
+
+#include "openwrt-kirkwood-common.h"
 
 #endif /* _CONFIG_POGO_E02_H */

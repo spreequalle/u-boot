@@ -51,6 +51,7 @@ dtb-$(CONFIG_KIRKWOOD) += \
 	kirkwood-iconnect.dtb \
 	kirkwood-is2.dtb \
 	kirkwood-km_kirkwood.dtb \
+	kirkwood-l-50.dtb \
 	kirkwood-lsxhl.dtb \
 	kirkwood-lschlv2.dtb \
 	kirkwood-net2big.dtb \

@@ -94,6 +94,8 @@
 #define PORT_REG_STATUS_CMODE_1000BASE_X	0x9
 #define PORT_REG_STATUS_CMODE_SGMII		0xa
 
+#define PORT_REG_PHYS_CTRL_RGMII_RX_DELAY	BIT(15)
+#define PORT_REG_PHYS_CTRL_RGMII_TX_DELAY	BIT(14)
 #define PORT_REG_PHYS_CTRL_PCS_AN_EN	BIT(10)
 #define PORT_REG_PHYS_CTRL_PCS_AN_RST	BIT(9)
 #define PORT_REG_PHYS_CTRL_FC_VALUE	BIT(7)
@@ -178,6 +180,7 @@
 #define PORT_SWITCH_ID_6071		0x0710
 #define PORT_SWITCH_ID_6096		0x0980
 #define PORT_SWITCH_ID_6097		0x0990
+#define PORT_SWITCH_ID_6171		0x1710
 #define PORT_SWITCH_ID_6172		0x1720
 #define PORT_SWITCH_ID_6176		0x1760
 #define PORT_SWITCH_ID_6220		0x2200
@@ -747,9 +750,16 @@ static int mv88e61xx_fixed_port_setup(struct phy_device *phydev, u8 port)
 		       PORT_REG_PHYS_CTRL_SPD1000;
 	}
 
-	if (port == CONFIG_MV88E61XX_CPU_PORT)
+	if (port == CONFIG_MV88E61XX_CPU_PORT) {
 		val |= PORT_REG_PHYS_CTRL_LINK_VALUE |
 		       PORT_REG_PHYS_CTRL_LINK_FORCE;
+#if defined(CONFIG_MV88E61XX_CPU_PORT_RX_DELAY)
+		val |= PORT_REG_PHYS_CTRL_RGMII_RX_DELAY;
+#endif
+#if defined(CONFIG_MV88E61XX_CPU_PORT_TX_DELAY)
+		val |= PORT_REG_PHYS_CTRL_RGMII_TX_DELAY;
+#endif
+	}
 
 	return mv88e61xx_port_write(phydev, port, PORT_REG_PHYS_CTRL,
 				   val);
@@ -988,6 +998,7 @@ static int mv88e61xx_probe(struct phy_device *phydev)
 	switch (priv->id) {
 	case PORT_SWITCH_ID_6096:
 	case PORT_SWITCH_ID_6097:
+	case PORT_SWITCH_ID_6171:
 	case PORT_SWITCH_ID_6172:
 	case PORT_SWITCH_ID_6176:
 	case PORT_SWITCH_ID_6240:
@@ -1143,6 +1154,17 @@ static struct phy_driver mv88e61xx_driver = {
 	.shutdown = &genphy_shutdown,
 };
 
+static struct phy_driver mv88e617x_driver = {
+	.name = "Marvell MV88E617x",
+	.uid = 0x01410e70,
+	.mask = 0xfffffff0,
+	.features = PHY_GBIT_FEATURES,
+	.probe = mv88e61xx_probe,
+	.config = mv88e61xx_phy_config,
+	.startup = mv88e61xx_phy_startup,
+	.shutdown = &genphy_shutdown,
+};
+
 static struct phy_driver mv88e609x_driver = {
 	.name = "Marvell MV88E609x",
 	.uid = 0x1410c89,
@@ -1168,6 +1190,7 @@ static struct phy_driver mv88e6071_driver = {
 int phy_mv88e61xx_init(void)
 {
 	phy_register(&mv88e61xx_driver);
+	phy_register(&mv88e617x_driver);
 	phy_register(&mv88e609x_driver);
 	phy_register(&mv88e6071_driver);
 

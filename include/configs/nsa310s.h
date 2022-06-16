@@ -30,22 +30,17 @@
 
 /* default environment variables */
 #define CONFIG_BOOTCOMMAND \
-	"setenv bootargs ${console} ${mtdparts} ${bootargs_root}; " \
-	"ubi part root; " \
-	"ubifsmount ubi:rootfs; " \
-	"ubifsload 0x800000 ${kernel}; " \
-	"ubifsload 0x700000 ${fdt}; " \
-	"ubifsumount; " \
-	"fdt addr 0x700000; fdt resize; fdt chosen; " \
-	"bootz 0x800000 - 0x700000"
+	"setenv bootargs ${console} ${mtdparts} ${bootargs_root}; "	\
+	"ubi part ubi; "						\
+	"ubifsmount ubi:rootfs; "					\
+	"ubi read 0x800000 kernel; "					\
+	"bootm 0x800000"
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"console=console=ttyS0,115200\0" \
-	"mtdids=nand0=orion_nand\0" \
-	"mtdparts="CONFIG_MTDPARTS_DEFAULT \
-	"kernel=/boot/zImage\0" \
-	"fdt=/boot/nsa310s.dtb\0" \
-	"bootargs_root=ubi.mtd=3 root=ubi0:rootfs rootfstype=ubifs rw\0"
+	"console=console=ttyS0,115200\0"	\
+	"mtdids=nand0=orion_nand\0"		\
+	"mtdparts="CONFIG_MTDPARTS_DEFAULT "\0"	\
+	"bootargs_root=\0"
 
 /* Ethernet driver configuration */
 #ifdef CONFIG_CMD_NET
@@ -67,5 +62,7 @@
 #ifdef CONFIG_CMD_DATE
 #define CONFIG_RTC_MV
 #endif /* CONFIG_CMD_DATE */
+
+#include "openwrt-kirkwood-common.h"
 
 #endif /* _CONFIG_NSA310S_H */

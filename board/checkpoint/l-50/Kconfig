@@ -1,0 +1,12 @@
+if TARGET_L50
+
+config SYS_BOARD
+	default "l-50"
+
+config SYS_VENDOR
+	default "checkpoint"
+
+config SYS_CONFIG_NAME
+	default "l-50"
+
+endif

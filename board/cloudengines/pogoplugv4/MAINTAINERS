@@ -1,0 +1,6 @@
+POGOPLUGV4 BOARD
+M:	Alberto Bursi <alberto.bursi@outlook.it>
+S:	Maintained
+F:	board/cloudengines/pogoplugv4/
+F:	include/configs/pogoplugv4.h
+F:	configs/pogoplugv4_defconfig

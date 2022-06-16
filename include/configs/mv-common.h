@@ -75,4 +75,10 @@
 #define CONFIG_SYS_MAX_NAND_DEVICE     1
 #endif
 
+/*
+ * Kirkwood MMC
+ */
+#if defined(CONFIG_KIRKWOOD) && defined(CONFIG_CMD_MMC)
+#define CONFIG_SYS_MMC_BASE KW_SDIO_BASE
+#endif /* defined(CONFIG_KIRKWOOD) && defined(CONFIG_CMD_MMC) */
 #endif /* _MV_COMMON_H */

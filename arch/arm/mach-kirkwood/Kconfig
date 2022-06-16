@@ -25,6 +25,9 @@ config TARGET_LSXL
 config TARGET_POGO_E02
 	bool "pogo_e02 Board"
 
+config TARGET_POGOPLUGV4
+    bool "Pogoplug V4 Board"
+
 config TARGET_DNS325
 	bool "dns325 Board"
 
@@ -53,6 +56,9 @@ config TARGET_GOFLEXHOME
 config TARGET_NAS220
 	bool "BlackArmor NAS220"
 
+config TARGET_NSA310
+	bool "Zyxel NSA310 Board"
+
 config TARGET_NSA310S
 	bool "Zyxel NSA310S"
 
@@ -64,6 +70,12 @@ config TARGET_SBx81LIFXCAT
 
 config TARGET_DB_88F6281_BP
 	bool "Marvell DB-88F6281-BP"
+
+config TARGET_NSA325
+	bool "Zyxel NSA325 board"
+
+config TARGET_L50
+	bool "Check Point L-50"
 
 endchoice
 
@@ -77,6 +89,7 @@ source "board/Marvell/guruplug/Kconfig"
 source "board/Marvell/sheevaplug/Kconfig"
 source "board/buffalo/lsxl/Kconfig"
 source "board/cloudengines/pogo_e02/Kconfig"
+source "board/cloudengines/pogoplugv4/Kconfig"
 source "board/d-link/dns325/Kconfig"
 source "board/iomega/iconnect/Kconfig"
 source "board/keymile/Kconfig"
@@ -86,9 +99,15 @@ source "board/raidsonic/ib62x0/Kconfig"
 source "board/Seagate/dockstar/Kconfig"
 source "board/Seagate/goflexhome/Kconfig"
 source "board/Seagate/nas220/Kconfig"
+source "board/zyxel/nsa310/Kconfig"
 source "board/zyxel/nsa310s/Kconfig"
+source "board/zyxel/nsa325/Kconfig"
 source "board/alliedtelesis/SBx81LIFKW/Kconfig"
 source "board/alliedtelesis/SBx81LIFXCAT/Kconfig"
 source "board/Marvell/db-88f6281-bp/Kconfig"
+source "board/checkpoint/l-50/Kconfig"
+
+config SECOND_STAGE
+	bool "OpenWrt second stage hack"
 
 endif
