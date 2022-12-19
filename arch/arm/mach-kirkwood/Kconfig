@@ -65,6 +65,9 @@ config TARGET_SBx81LIFXCAT
 config TARGET_DB_88F6281_BP
 	bool "Marvell DB-88F6281-BP"
 
+config TARGET_TS221
+	bool "QNAP TS-221"
+
 endchoice
 
 config SYS_SOC
@@ -90,5 +93,6 @@ source "board/zyxel/nsa310s/Kconfig"
 source "board/alliedtelesis/SBx81LIFKW/Kconfig"
 source "board/alliedtelesis/SBx81LIFXCAT/Kconfig"
 source "board/Marvell/db-88f6281-bp/Kconfig"
+source "board/qnap/ts221/Kconfig"
 
 endif

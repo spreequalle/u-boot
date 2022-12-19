@@ -1,0 +1,6 @@
+TS221 BOARD
+M:	Erik Hoppe <generik@spreequalle.de>
+S:	Maintained
+F:	board/qnap/ts221/
+F:	include/configs/ts221.h
+F:	configs/ts221_defconfig
