@@ -1,0 +1,12 @@
+if TARGET_SILVERSTORE
+
+config SYS_BOARD
+       default "silverstore"
+
+config SYS_VENDOR
+       default "freecom"
+
+config SYS_CONFIG_NAME
+       default "silverstore"
+
+endif

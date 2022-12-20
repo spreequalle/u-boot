@@ -1,0 +1,6 @@
+SILVERSTORE BOARD
+M:	Erik Hoppe <generik@spreequalle.de>
+S:	Maintained
+F:	board/freecom/silverstore/
+F:	include/configs/silverstore.h
+F:	configs/silverstore_defconfig
