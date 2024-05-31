@@ -83,10 +83,6 @@ typedef volatile unsigned char	vu_char;
 #include <mpc85xx.h>
 #include <asm/immap_85xx.h>
 #endif
-#ifdef CONFIG_MPC83XX
-#include <mpc83xx.h>
-#include <asm/immap_83xx.h>
-#endif
 #ifdef	CONFIG_4xx
 #include <ppc4xx.h>
 #endif
@@ -157,6 +153,35 @@ typedef void (interrupt_handler_t)(void *);
 	({ typeof (X) __x = (X), __y = (Y);	\
 		(__x > __y) ? __x : __y; })
 
+/*
+*  kaiker define
+*/
+
+#define NUM_RX_DESC 20
+#define NUM_TX_DESC 20
+
+
+//   For loopback test
+
+typedef struct _BUFFER_ELEM_    BUFFER_ELEM;
+
+struct _BUFFER_ELEM_
+{
+	int tx_idx;
+    unsigned char *pbuf;
+    BUFFER_ELEM       *next;
+    
+    
+};
+
+typedef struct _VALID_BUFFER_STRUCT_    VALID_BUFFER_STRUCT;
+
+struct _VALID_BUFFER_STRUCT_
+{
+    BUFFER_ELEM    *head;
+    BUFFER_ELEM    *tail;	
+};
+
 
 /*
  * Function Prototypes
@@ -180,7 +205,7 @@ void	print_size (ulong, const char *);
 /* common/main.c */
 void	main_loop	(void);
 int	run_command	(const char *cmd, int flag);
-int	readline	(const char *const prompt);
+int	readline	(const char *const prompt, int show_buf);
 void	init_cmd_timeout(void);
 void	reset_cmd_timeout(void);
 
@@ -253,7 +278,7 @@ int	misc_init_r   (void);
 void	jumptable_init(void);
 
 /* common/memsize.c */
-int	get_ram_size  (volatile long *, long);
+//int	get_ram_size  (volatile long *, long);
 
 /* $(BOARD)/$(BOARD).c */
 void	reset_phy     (void);
@@ -355,6 +380,8 @@ int	dcache_status (void);
 void	dcache_enable (void);
 void	dcache_disable(void);
 void	relocate_code (ulong, gd_t *, ulong);
+void 	mips_cache_reset(void);
+
 ulong	get_endaddr   (void);
 void	trap_init     (ulong);
 #if defined (CONFIG_4xx)	|| \
@@ -387,24 +414,15 @@ int	checkicache   (void);
 int	checkdcache   (void);
 void	upmconfig     (unsigned int, unsigned int *, unsigned int);
 ulong	get_tbclk     (void);
-void	reset_cpu     (ulong addr);
 
 /* $(CPU)/serial.c */
 int	serial_init   (void);
-void	serial_addr   (unsigned int);
 void	serial_setbrg (void);
 void	serial_putc   (const char);
-void	serial_putc_raw(const char);
 void	serial_puts   (const char *);
+void	serial_addr   (unsigned int);
 int	serial_getc   (void);
 int	serial_tstc   (void);
-
-void	_serial_setbrg (const int);
-void	_serial_putc   (const char, const int);
-void	_serial_putc_raw(const char, const int);
-void	_serial_puts   (const char *, const int);
-int	_serial_getc   (const int);
-int	_serial_tstc   (const int);
 
 /* $(CPU)/speed.c */
 int	get_clocks (void);
@@ -413,9 +431,8 @@ int	sdram_adjust_866 (void);
 int	adjust_sdram_tbs_8xx (void);
 #if defined(CONFIG_8260)
 int	prt_8260_clks (void);
-#elif defined(CONFIG_MPC83XX)
-int print_clock_conf(void);
-#elif defined(CONFIG_MPC5xxx)
+#endif
+#if defined(CONFIG_MPC5xxx)
 int	prt_mpc5xxx_clks (void);
 #endif
 #if defined(CONFIG_MPC8220)
@@ -544,6 +561,7 @@ int	console_init_f(void);	/* Before relocation; uses the serial  stuff	*/
 int	console_init_r(void);	/* After  relocation; uses the console stuff	*/
 int	console_assign (int file, char *devname);	/* Assign the console	*/
 int	ctrlc (void);
+int kaiker_button_p (void); // add by kaiker
 int	had_ctrlc (void);	/* have we had a Control-C since last clear? */
 void	clear_ctrlc (void);	/* clear the Control-C condition */
 int	disable_ctrlc (int);	/* 1 to disable, 0 to enable Control-C detect */
@@ -589,11 +607,6 @@ int	pcmcia_init (void);
 
 #ifdef CONFIG_SHOW_BOOT_PROGRESS
 void	show_boot_progress (int status);
-#endif
-
-#ifdef CONFIG_INIT_CRITICAL
-#error CONFIG_INIT_CRITICAL is depracted!
-#error Read section CONFIG_SKIP_LOWLEVEL_INIT in README.
 #endif
 
 #endif	/* __COMMON_H_ */

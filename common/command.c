@@ -42,6 +42,7 @@ U_BOOT_CMD(
 	NULL
 );
 
+#if (CONFIG_COMMANDS & CFG_CMD_ECHO)
 int
 do_echo (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
@@ -73,6 +74,7 @@ U_BOOT_CMD(
  	"[args..]\n"
 	"    - echo args to console; \\c suppresses newline\n"
 );
+#endif
 
 #ifdef CFG_HUSH_PARSER
 
@@ -136,9 +138,9 @@ do_test (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 		if (adv == 2) {
 			if (strcmp(ap[0], "-z") == 0)
-				expr = strlen(ap[1]) == 0 ? 1 : 0;
-			else if (strcmp(ap[0], "-n") == 0)
 				expr = strlen(ap[1]) == 0 ? 0 : 1;
+			else if (strcmp(ap[0], "-n") == 0)
+				expr = strlen(ap[1]) == 0 ? 1 : 0;
 			else {
 				expr = 1;
 				break;

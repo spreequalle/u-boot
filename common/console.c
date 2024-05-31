@@ -39,9 +39,11 @@ int console_changed = 0;
  */
 #ifdef CFG_CONSOLE_OVERWRITE_ROUTINE
 extern int overwrite_console (void);
-#define OVERWRITE_CONSOLE overwrite_console ()
 #else
-#define OVERWRITE_CONSOLE 0
+int overwrite_console (void)
+{
+	return (0);
+}
 #endif /* CFG_CONSOLE_OVERWRITE_ROUTINE */
 
 #endif /* CFG_CONSOLE_IS_IN_ENV */
@@ -162,7 +164,6 @@ void fprintf (int file, const char *fmt, ...)
 int getc (void)
 {
 	DECLARE_GLOBAL_DATA_PTR;
-
 	if (gd->flags & GD_FLG_DEVINIT) {
 		/* Get from the standard input */
 		return fgetc (stdin);
@@ -175,7 +176,6 @@ int getc (void)
 int tstc (void)
 {
 	DECLARE_GLOBAL_DATA_PTR;
-
 	if (gd->flags & GD_FLG_DEVINIT) {
 		/* Test the standard input */
 		return ftstc (stdin);
@@ -266,6 +266,28 @@ int ctrlc (void)
 			case 0x03:		/* ^C - Control C */
 				ctrlc_was_pressed = 1;
 				return 1;
+			default:
+				break;
+			}
+		}
+	}
+	return 0;
+}
+
+int kaiker_button_p (void)
+{
+	DECLARE_GLOBAL_DATA_PTR;
+
+	if (!ctrlc_disabled && gd->have_console) {
+		if (tstc ()) {
+			switch (getc ()) {
+			case 0x03:		/* ^C - Control C */
+				ctrlc_was_pressed = 1;
+				return 1;
+			case 0x70:
+			return 2;	
+			case 'q':
+			return 3;
 			default:
 				break;
 			}
@@ -371,14 +393,11 @@ int console_assign (int file, char *devname)
 int console_init_f (void)
 {
 	DECLARE_GLOBAL_DATA_PTR;
-
 	gd->have_console = 1;
-
 #ifdef CONFIG_SILENT_CONSOLE
 	if (getenv("silent") != NULL)
 		gd->flags |= GD_FLG_SILENT;
 #endif
-
 	return (0);
 }
 
@@ -427,7 +446,7 @@ int console_init_r (void)
 	stdoutname = getenv ("stdout");
 	stderrname = getenv ("stderr");
 
-	if (OVERWRITE_CONSOLE == 0) { 	/* if not overwritten by config switch */
+	if (overwrite_console () == 0) { /* if not overwritten by config switch */
 		inputdev  = search_device (DEV_FLAGS_INPUT,  stdinname);
 		outputdev = search_device (DEV_FLAGS_OUTPUT, stdoutname);
 		errdev    = search_device (DEV_FLAGS_OUTPUT, stderrname);

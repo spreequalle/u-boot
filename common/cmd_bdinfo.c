@@ -61,26 +61,24 @@ int do_bdinfo ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 #endif
 	print_num ("bootflags",	    bd->bi_bootflags	);
 #if defined(CONFIG_405GP) || defined(CONFIG_405CR) || \
-    defined(CONFIG_405EP) || defined(CONFIG_XILINX_ML300) || \
-    defined(CONFIG_440EP) || defined(CONFIG_440GR)
+    defined(CONFIG_405EP) || defined(CONFIG_XILINX_ML300)
 	print_str ("procfreq",	    strmhz(buf, bd->bi_procfreq));
 	print_str ("plb_busfreq",   strmhz(buf, bd->bi_plb_busfreq));
-#if defined(CONFIG_405GP) || defined(CONFIG_405EP) || defined(CONFIG_XILINX_ML300) || \
-    defined(CONFIG_440EP) || defined(CONFIG_440GR)
+#if defined(CONFIG_405GP) || defined(CONFIG_405EP) || defined(CONFIG_XILINX_ML300)
 	print_str ("pci_busfreq",   strmhz(buf, bd->bi_pci_busfreq));
 #endif
-#else	/* ! CONFIG_405GP, CONFIG_405CR, CONFIG_405EP, CONFIG_XILINX_ML300, CONFIG_440EP CONFIG_440GR */
-#if defined(CONFIG_CPM2)
+#else	/* ! CONFIG_405GP, CONFIG_405CR, CONFIG_405EP, CONFIG_XILINX_ML300 */
+#if defined(CONFIG_8260) || defined(CONFIG_MPC8560)
 	print_str ("vco",	    strmhz(buf, bd->bi_vco));
 	print_str ("sccfreq",	    strmhz(buf, bd->bi_sccfreq));
 	print_str ("brgfreq",	    strmhz(buf, bd->bi_brgfreq));
 #endif
 	print_str ("intfreq",	    strmhz(buf, bd->bi_intfreq));
-#if defined(CONFIG_CPM2)
+#if defined(CONFIG_8260) || defined(CONFIG_MPC8560)
 	print_str ("cpmfreq",	    strmhz(buf, bd->bi_cpmfreq));
 #endif
 	print_str ("busfreq",	    strmhz(buf, bd->bi_busfreq));
-#endif /* CONFIG_405GP, CONFIG_405CR, CONFIG_405EP, CONFIG_XILINX_ML300, CONFIG_440EP CONFIG_440GR */
+#endif /* CONFIG_405GP, CONFIG_405CR, CONFIG_405EP, CONFIG_XILINX_ML300 */
 #if defined(CONFIG_MPC8220)
 	print_str ("inpfreq",	    strmhz(buf, bd->bi_inpfreq));
 	print_str ("flbfreq",	    strmhz(buf, bd->bi_flbfreq));
@@ -212,6 +210,7 @@ int do_bdinfo ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 #endif  /* MIPS */
 
 #else	/* ARM */
+#ifdef RT2880_U_BOOT_CMD_OPEN
 
 int do_bdinfo ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
@@ -219,7 +218,7 @@ int do_bdinfo ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 	int i;
 	bd_t *bd = gd->bd;
-
+#if 1
 	print_num ("arch_number",	bd->bi_arch_number);
 	print_num ("env_t",		(ulong)bd->bi_env);
 	print_num ("boot_params",	(ulong)bd->bi_boot_params);
@@ -239,10 +238,10 @@ int do_bdinfo ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	print_IPaddr (bd->bi_ip_addr);
 	printf ("\n"
 		"baudrate    = %d bps\n", bd->bi_baudrate);
-
+#endif 
 	return 0;
 }
-
+#endif
 #endif /* CONFIG_ARM XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
 static void print_num(const char *name, ulong value)
@@ -259,10 +258,12 @@ static void print_str(const char *name, const char *str)
 
 
 /* -------------------------------------------------------------------- */
+#ifdef RT2880_U_BOOT_CMD_OPEN
 
 U_BOOT_CMD(
 	bdinfo,	1,	1,	do_bdinfo,
 	"bdinfo  - print Board Info structure\n",
 	NULL
 );
+#endif
 #endif	/* CFG_CMD_BDI */

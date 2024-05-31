@@ -1,0 +1,65 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<script language="JavaScript">
+			var which_id;
+			var total_second = 120;
+			var which_second = 0;
+			
+			function show_success_msg(){
+				document.getElementById("upgrade_msg").style.display = "none";
+				document.getElementById("upgrade_warning").style.display = "none";
+				document.getElementById("success_msg").style.display = "";				
+				document.getElementById("success_warning").style.display = "";	
+			}
+			
+			function change_time(){
+				var precent = Math.round((++which_second / total_second) * 100);
+								
+				if (precent > 100){
+					precent = 100;
+				}
+				
+				document.getElementById("show_second").innerHTML = precent;
+				
+				if (precent == 100){
+					clearInterval(which_id);
+					setTimeout("show_success_msg()", 2000);														
+				}					
+			}
+			
+			function start_counting(){
+				document.getElementById("upgrade_msg").style.display = "";
+				document.getElementById("upgrade_warning").style.display = "";
+				document.getElementById("success_msg").style.display = "none";				
+				document.getElementById("success_warning").style.display = "none";
+				which_id = setInterval('change_time()', 1000);
+			}
+		</script>
+	</head>
+	<body onLoad="start_counting()">
+		<form action="/cgi/index" enctype="multipart/form-data" method=post>
+			<center>
+				<font color=blue face=verdana size=5><b>D-Link Access Point Recovery Mode</b></font>    			
+    			<br><br><br><br>
+    			<div id="upgrade_msg"><font size="3" face="Verdana, Arial, Helvetica, sans-serif">Device is upgrading the firmware .... <span id="show_second">0</span>%</font></div>
+    			<div id="success_msg" style="display:none"><font face="Verdana, Arial, Helvetica, sans-serif" color="red" size="5">Upgrade successfully!</font></div>
+  			</center>
+  		</form>  		
+		<hr>
+		<br>
+		<center>
+			<font face=Verdana color=red size=4><b>WARNING!!</b></font>
+		</center>
+		<br>
+		<font face=Verdana size=2>
+		<div id="upgrade_warning">
+			<li>Do not interrupt the update process, as it may damage the device.</li>
+		</div>
+		<div id="success_warning" style="display:none">
+			<li>If a wrong firmware image is upgraded, the device may not work properly or even could not boot-up again.</li>
+		</div>
+		</font>		
+		<hr>
+	</body>
+</html>

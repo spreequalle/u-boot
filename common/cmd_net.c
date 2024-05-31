@@ -27,14 +27,15 @@
 #include <common.h>
 #include <command.h>
 #include <net.h>
-
+#undef DEBUG
 #if (CONFIG_COMMANDS & CFG_CMD_NET)
 
 
 extern int do_bootm (cmd_tbl_t *, int, int, char *[]);
+extern int modifies;
+static int netboot_common (int, cmd_tbl_t *, int , char *[]);
 
-static int netboot_common (proto_t, cmd_tbl_t *, int , char *[]);
-
+#ifdef RT2880_U_BOOT_CMD_OPEN
 int do_bootp (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
 	return netboot_common (BOOTP, cmdtp, argc, argv);
@@ -45,9 +46,13 @@ U_BOOT_CMD(
 	"bootp\t- boot image via network using BootP/TFTP protocol\n",
 	"[loadAddress] [bootfilename]\n"
 );
+#endif
 
 int do_tftpb (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
+#ifdef DEBUG
+   printf("File: %s, Func: %s, Line: %d\n", __FILE__,__FUNCTION__ , __LINE__);
+#endif   
 	return netboot_common (TFTP, cmdtp, argc, argv);
 }
 
@@ -57,6 +62,21 @@ U_BOOT_CMD(
 	"[loadAddress] [bootfilename]\n"
 );
 
+int do_httpd (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+#ifdef DEBUG
+   printf("File: %s, Func: %s, Line: %d\n", __FILE__,__FUNCTION__ , __LINE__);
+#endif   
+	return netboot_common (HTTP, cmdtp, argc, argv);
+}
+
+U_BOOT_CMD(
+	httpboot,	3,	1,	do_httpd,
+	"httpboot- entering the backup mode.\n",
+	"\n"
+);
+
+#ifdef RT2880_U_BOOT_CMD_OPEN
 int do_rarpb (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
 	return netboot_common (RARP, cmdtp, argc, argv);
@@ -67,7 +87,7 @@ U_BOOT_CMD(
 	"rarpboot- boot image via network using RARP/TFTP protocol\n",
 	"[loadAddress] [bootfilename]\n"
 );
-
+#endif
 #if (CONFIG_COMMANDS & CFG_CMD_DHCP)
 int do_dhcp (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
@@ -94,6 +114,7 @@ U_BOOT_CMD(
 );
 #endif	/* CFG_CMD_NFS */
 
+#if (CONFIG_COMMANDS & CFG_CMD_ENV)
 static void netboot_update_env (void)
 {
 	char tmp[22];
@@ -137,27 +158,18 @@ static void netboot_update_env (void)
 	if (NetOurNISDomain[0])
 		setenv ("domain", NetOurNISDomain);
 
-#if (CONFIG_COMMANDS & CFG_CMD_SNTP) && (CONFIG_BOOTP_MASK & CONFIG_BOOTP_TIMEOFFSET)
-	if (NetTimeOffset) {
-		sprintf (tmp, "%d", NetTimeOffset);
-		setenv ("timeoffset", tmp);
-	}
-#endif
-#if (CONFIG_COMMANDS & CFG_CMD_SNTP) && (CONFIG_BOOTP_MASK & CONFIG_BOOTP_NTPSERVER)
-	if (NetNtpServerIP) {
-		ip_to_string (NetNtpServerIP, tmp);
-		setenv ("ntpserverip", tmp);
-	}
-#endif
 }
+#endif
 
 static int
-netboot_common (proto_t proto, cmd_tbl_t *cmdtp, int argc, char *argv[])
+netboot_common (int proto, cmd_tbl_t *cmdtp, int argc, char *argv[])
 {
 	char *s;
 	int   rcode = 0;
 	int   size;
 
+
+		printf("\n netboot_common, argc= %d \n", argc);
 	/* pre-set load_addr */
 	if ((s = getenv("loadaddr")) != NULL) {
 		load_addr = simple_strtoul(s, NULL, 16);
@@ -168,9 +180,9 @@ netboot_common (proto_t proto, cmd_tbl_t *cmdtp, int argc, char *argv[])
 		break;
 
 	case 2:	/* only one arg - accept two forms:
-		 * just load address, or just boot file name.
-		 * The latter form must be written "filename" here.
-		 */
+		       * just load address, or just boot file name.
+		       * The latter form must be written "filename" here.
+		       */
 		if (argv[1][0] == '"') {	/* just boot filename */
 			copy_filename (BootFile, argv[1], sizeof(BootFile));
 		} else {			/* load address	*/
@@ -180,7 +192,10 @@ netboot_common (proto_t proto, cmd_tbl_t *cmdtp, int argc, char *argv[])
 
 	case 3:	load_addr = simple_strtoul(argv[1], NULL, 16);
 		copy_filename (BootFile, argv[2], sizeof(BootFile));
-
+   #ifdef DEBUG		
+      printf("load addr= 0x%08x\n", load_addr);
+      printf("boot file= %s\n", BootFile);
+   #endif      
 		break;
 
 	default: printf ("Usage:\n%s\n", cmdtp->usage);
@@ -189,25 +204,39 @@ netboot_common (proto_t proto, cmd_tbl_t *cmdtp, int argc, char *argv[])
 
 	if ((size = NetLoop(proto)) < 0)
 		return 1;
-
+   printf("NetBootFileXferSize= %08x\n", size);
+   
 	/* NetLoop ok, update environment */
+#if (CONFIG_COMMANDS & CFG_CMD_ENV)
 	netboot_update_env();
-
+#endif
+   
 	/* done if no file was loaded (no errors though) */
 	if (size == 0)
 		return 0;
 
 	/* flush cache */
 	flush_cache(load_addr, size);
-
+	
 	/* Loading ok, check if we should attempt an auto-start */
 	if (((s = getenv("autostart")) != NULL) && (strcmp(s,"yes") == 0)) {
 		char *local_args[2];
 		local_args[0] = argv[0];
 		local_args[1] = NULL;
 
-		printf ("Automatic boot of image at addr 0x%08lX ...\n",
-			load_addr);
+      if(modifies) {
+         setenv("autostart", "no");
+         setenv ("bootfile", BootFile);
+      #ifdef DEBUG         
+         s = getenv("bootfile");
+	      printf("save bootfile= %s\n", s);
+      #endif
+#if (CONFIG_COMMANDS & CFG_CMD_ENV)
+         saveenv();		
+#endif
+      }
+
+		printf ("Automatic boot of image at addr 0x%08lX ...\n",	load_addr);
 		rcode = do_bootm (cmdtp, 0, 1, local_args);
 	}
 
@@ -223,9 +252,11 @@ netboot_common (proto_t proto, cmd_tbl_t *cmdtp, int argc, char *argv[])
 #if (CONFIG_COMMANDS & CFG_CMD_PING)
 int do_ping (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
+	
+
 	if (argc < 2)
 		return -1;
-
+    
 	NetPingIP = string_to_ip(argv[1]);
 	if (NetPingIP == 0) {
 		printf ("Usage:\n%s\n", cmdtp->usage);
@@ -244,7 +275,7 @@ int do_ping (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 U_BOOT_CMD(
 	ping,	2,	1,	do_ping,
-	"ping\t- send ICMP ECHO_REQUEST to network host\n",
+	"ping\t- kaiker,send ICMP ECHO_REQUEST to network host\n",
 	"pingAddress\n"
 );
 #endif	/* CFG_CMD_PING */
@@ -291,43 +322,5 @@ U_BOOT_CMD(
 	"cdp\t- Perform CDP network configuration\n",
 );
 #endif	/* CFG_CMD_CDP */
-
-#if (CONFIG_COMMANDS & CFG_CMD_SNTP)
-int do_sntp (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
-{
-	char *toff;
-
-	if (argc < 2) {
-		NetNtpServerIP = getenv_IPaddr ("ntpserverip");
-		if (NetNtpServerIP == 0) {
-			printf ("ntpserverip not set\n");
-			return (1);
-		}
-	} else {
-		NetNtpServerIP = string_to_ip(argv[1]);
-		if (NetNtpServerIP == 0) {
-			printf ("Bad NTP server IP address\n");
-			return (1);
-		}
-	}
-
-	toff = getenv ("timeoffset");
-	if (toff == NULL) NetTimeOffset = 0;
-	else NetTimeOffset = simple_strtol (toff, NULL, 10);
-
-	if (NetLoop(SNTP) < 0) {
-		printf("SNTP failed: host %s not responding\n", argv[1]);
-		return 1;
-	}
-
-	return 0;
-}
-
-U_BOOT_CMD(
-	sntp,	2,	1,	do_sntp,
-	"sntp\t- synchronize RTC via network\n",
-	"[NTP server IP]\n"
-);
-#endif	/* CFG_CMD_SNTP */
 
 #endif	/* CFG_CMD_NET */

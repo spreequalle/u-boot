@@ -40,7 +40,6 @@ D: Unified support for Motorola MPC826xADS/MPC8272ADS/PQ2FADS boards.
 D: Support for Zephyr Engineering ZPC.1900 board.
 D: Support for Interphase iSPAN boards.
 D: Support for Analogue&Micro Adder boards.
-D: Support for Analogue&Micro Rattler boards.
 W: http://www.arabellasw.com
 
 N: Jerry van Baren
@@ -198,9 +197,10 @@ D: Support for Samsung ARM920T S3C2400X, ARM920T "TRAB"
 W: www.denx.de
 
 N: Murray Jensen
-E: Murray.Jensen@csiro.au
+E: Murray.Jensen@cmst.csiro.au
 D: Initial 8260 support; GDB support
 D: Port to Cogent+Hymod boards; Hymod Board Database
+W: http://www.msa.cmst.csiro.au/ourstaff/MurrayJensen/mjj.html
 
 N: Yoo. Jonghoon
 E: yooth@ipone.co.kr
@@ -393,10 +393,6 @@ N: Rune Torgersen
 E: <runet@innovsys.com>
 D: Support for Motorola MPC8266ADS board
 
-N: Greg Ungerer
-E: greg.ungerer@opengear.com
-D: Support for ks8695 CPU, and OpenGear cmXXXX boards
-
 N: David Updegraff
 E: dave@cray.com
 D: Port to Cray L1 board; DHCP vendor extensions
@@ -404,10 +400,6 @@ D: Port to Cray L1 board; DHCP vendor extensions
 N: Christian Vejlbo
 E: christian.vejlbo@tellabs.com
 D: FADS860T ethernet support
-
-N: Robert Whaley
-E: rwhaley@applieddata.net
-D: Port to ARM PXA27x adsvix SBC
 
 N: Martin Winistoerfer
 E: martinwinistoerfer@gmx.ch

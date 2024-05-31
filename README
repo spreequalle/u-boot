@@ -126,12 +126,12 @@ Directory Hierarchy:
   - 74xx_7xx	Files specific to Freescale MPC74xx and 7xx CPUs
   - arm720t	Files specific to ARM 720 CPUs
   - arm920t	Files specific to ARM 920 CPUs
-    - at91rm9200 Files specific to Atmel AT91RM9200 CPU
     - imx	Files specific to Freescale MC9328 i.MX CPUs
     - s3c24x0	Files specific to Samsung S3C24X0 CPUs
   - arm925t	Files specific to ARM 925 CPUs
   - arm926ejs	Files specific to ARM 926 CPUs
   - arm1136	Files specific to ARM 1136 CPUs
+  - at91rm9200	Files specific to Atmel AT91RM9200 CPUs
   - i386	Files specific to i386 CPUs
   - ixp		Files specific to Intel XScale IXP CPUs
   - mcf52x2	Files specific to Freescale ColdFire MCF52x2 CPUs
@@ -287,17 +287,17 @@ The following options need to be configured:
 		CONFIG_EBONY		CONFIG_MOUSSE		CONFIG_SXNI855T
 		CONFIG_ELPPC		CONFIG_MPC8260ADS	CONFIG_TQM823L
 		CONFIG_ELPT860		CONFIG_MPC8540ADS	CONFIG_TQM8260
-		CONFIG_ep8260		CONFIG_MPC8540EVAL	CONFIG_TQM850L
-		CONFIG_ERIC		CONFIG_MPC8560ADS	CONFIG_TQM855L
-		CONFIG_ESTEEM192E	CONFIG_MUSENKI		CONFIG_TQM860L
-		CONFIG_ETX094		CONFIG_MVS1		CONFIG_TTTech
-		CONFIG_EVB64260		CONFIG_NETPHONE		CONFIG_UTX8245
-		CONFIG_FADS823		CONFIG_NETTA		CONFIG_V37
-		CONFIG_FADS850SAR	CONFIG_NETVIA		CONFIG_W7OLMC
-		CONFIG_FADS860T		CONFIG_NX823		CONFIG_W7OLMG
-		CONFIG_FLAGADM		CONFIG_OCRTC		CONFIG_WALNUT
-		CONFIG_FPS850L		CONFIG_ORSG		CONFIG_ZPC1900
-		CONFIG_FPS860L		CONFIG_OXC		CONFIG_ZUMA
+		CONFIG_ep8260		CONFIG_MPC8560ADS	CONFIG_TQM850L
+		CONFIG_ERIC		CONFIG_MUSENKI		CONFIG_TQM855L
+		CONFIG_ESTEEM192E	CONFIG_MVS1		CONFIG_TQM860L
+		CONFIG_ETX094		CONFIG_NETPHONE		CONFIG_TTTech
+		CONFIG_EVB64260		CONFIG_NETTA		CONFIG_UTX8245
+		CONFIG_FADS823		CONFIG_NETVIA		CONFIG_V37
+		CONFIG_FADS850SAR	CONFIG_NX823		CONFIG_W7OLMC
+		CONFIG_FADS860T		CONFIG_OCRTC		CONFIG_W7OLMG
+		CONFIG_FLAGADM		CONFIG_ORSG		CONFIG_WALNUT405
+		CONFIG_FPS850L		CONFIG_OXC		CONFIG_ZPC1900
+		CONFIG_FPS860L					CONFIG_ZUMA
 
 		ARM based boards:
 		-----------------
@@ -627,7 +627,6 @@ The following options need to be configured:
 		CFG_CMD_SAVES	* save S record dump
 		CFG_CMD_SCSI	* SCSI Support
 		CFG_CMD_SDRAM	* print SDRAM configuration information
-				  (requires CFG_CMD_I2C)
 		CFG_CMD_SETGETDCR Support for DCR Register access (4xx only)
 		CFG_CMD_SPI	* SPI serial bus support
 		CFG_CMD_USB	* USB support
@@ -2129,19 +2128,6 @@ Low Level (hardware related) configuration options:
 		This only takes effect if the memory commands are activated
 		globally (CFG_CMD_MEM).
 
-- CONFIG_SKIP_LOWLEVEL_INIT
-- CONFIG_SKIP_RELOCATE_UBOOT
-
-		[ARM only] If these variables are defined, then
-		certain low level initializations (like setting up
-		the memory controller) are omitted and/or U-Boot does
-		not relocate itself into RAM.
-		Normally these variables MUST NOT be defined. The
-		only exception is when U-Boot is loaded (to RAM) by
-		some other boot loader or by a debugger which
-		performs these intializations itself.
-
-
 Building the Software:
 ======================
 
@@ -2186,14 +2172,14 @@ configurations; the following names are supported:
 	DUET_ADS_config		MBX_config		sbc8560_66_config
 	EBONY_config		MPC8260ADS_config	SM850_config
 	ELPT860_config		MPC8540ADS_config	SPD823TS_config
-	ESTEEM192E_config	MPC8540EVAL_config	stxgp3_config
-	ETX094_config		MPC8560ADS_config	SXNI855T_config
-	FADS823_config		NETVIA_config		TQM823L_config
-	FADS850SAR_config	omap1510inn_config	TQM850L_config
-	FADS860T_config		omap1610h2_config	TQM855L_config
-	FPS850L_config		omap1610inn_config	TQM860L_config
-				omap5912osk_config	walnut_config
-				omap2420h4_config	Yukon8220_config
+	ESTEEM192E_config	MPC8560ADS_config	stxgp3_config
+	ETX094_config		NETVIA_config		SXNI855T_config
+	FADS823_config		omap1510inn_config	TQM823L_config
+	FADS850SAR_config	omap1610h2_config	TQM850L_config
+	FADS860T_config		omap1610inn_config	TQM855L_config
+	FPS850L_config		omap5912osk_config	TQM860L_config
+				omap2420h4_config	WALNUT405_config
+							Yukon8220_config
 							ZPC1900_config
 
 Note: for some board special configuration names may exist; check if
@@ -3081,7 +3067,8 @@ Booting assumes that (the first part of) the image booted is a
 stage-2 loader which in turn loads and then invokes the kernel
 proper. Loader sources will eventually appear in the NetBSD source
 tree (probably in sys/arc/mpc8xx/stand/u-boot_stage2/); in the
-meantime, see ftp://ftp.denx.de/pub/u-boot/ppcboot_stage2.tar.gz
+meantime, send mail to bruno@exet-ag.de and/or wd@denx.de for
+details.
 
 
 Implementation Internals:
@@ -3135,7 +3122,7 @@ locked as (mis-) used as memory, etc.
 	CFG_INIT_RAM_ADDR should be somewhere that won't interfere
 	with your processor/board/system design. The default value
 	you will find in any recent u-boot distribution in
-	walnut.h should work for you. I'd set it to a value larger
+	Walnut405.h should work for you. I'd set it to a value larger
 	than your SDRAM module. If you have a 64MB SDRAM module, set
 	it above 400_0000. Just make sure your board has no resources
 	that are supposed to respond to that address! That code in
@@ -3381,7 +3368,6 @@ Since the number of patches for U-Boot is growing, we need to
 establish some rules. Submissions which do not conform to these rules
 may be rejected, even when they contain important and valuable stuff.
 
-Patches shall be sent to the u-boot-users mailing list.
 
 When you send a patch, please include the following information with
 it:
@@ -3439,6 +3425,3 @@ Notes:
   (using #ifdef), and the resulting code with the new feature
   disabled must not need more memory than the old code without your
   modification.
-
-* Remember that there is a size limit of 40 kB per message on the
-  u-boot-users mailing list. Compression may help.

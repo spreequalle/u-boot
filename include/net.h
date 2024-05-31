@@ -29,7 +29,7 @@
 # endif
 #endif	/* CONFIG_MPC5xxx */
 
-#if !defined(CONFIG_NET_MULTI) && defined(CONFIG_CPM2)
+#if !defined(CONFIG_NET_MULTI) && (defined(CONFIG_8260) || defined(CONFIG_MPC8560))
 #include <config.h>
 #if defined(CONFIG_ETHER_ON_FCC)
 #if defined(CONFIG_ETHER_ON_SCC)
@@ -64,11 +64,11 @@
 #ifdef CFG_RX_ETH_BUFFER
 # define PKTBUFSRX	CFG_RX_ETH_BUFFER
 #else
-# define PKTBUFSRX	4
+# define PKTBUFSRX	8
 #endif
 
-#define PKTALIGN	32
-
+#define PKTALIGN	64
+#define FLANK_TEST_SPX_ALIGNMENT 16
 typedef ulong		IPaddr_t;
 
 
@@ -167,6 +167,7 @@ typedef struct {
 #define PROT_VLAN	0x8100		/* IEEE 802.1q protocol		*/
 
 #define IPPROTO_ICMP	 1	/* Internet Control Message Protocol	*/
+#define IPPROTO_TCP	6	/* Transmission Control Protocol		*/
 #define IPPROTO_UDP	17	/* User Datagram Protocol		*/
 
 /*
@@ -241,6 +242,10 @@ typedef struct icmphdr {
 	uchar		type;
 	uchar		code;
 	ushort		checksum;
+	ushort	id;
+	ushort	sequence;
+	uchar		data[32];
+	/*
 	union {
 		struct {
 			ushort	id;
@@ -252,6 +257,7 @@ typedef struct icmphdr {
 			ushort	mtu;
 		} frag;
 	} un;
+	*/
 } ICMP_t;
 
 
@@ -335,7 +341,7 @@ extern int		NetState;		/* Network loop state		*/
 extern int		NetRestartWrap;		/* Tried all network devices	*/
 #endif
 
-typedef enum { BOOTP, RARP, ARP, TFTP, DHCP, PING, DNS, NFS, CDP, NETCONS, SNTP } proto_t;
+typedef enum { BOOTP, RARP, ARP, TFTP, DHCP, PING, DNS, NFS, CDP, NETCONS, HTTP} proto_t;
 
 /* from net/net.c */
 extern char	BootFile[128];			/* Boot File name		*/
@@ -348,11 +354,6 @@ extern IPaddr_t	NetPingIP;			/* the ip address to ping 		*/
 /* when CDP completes these hold the return values */
 extern ushort CDPNativeVLAN;
 extern ushort CDPApplianceVLAN;
-#endif
-
-#if (CONFIG_COMMANDS & CFG_CMD_SNTP)
-extern IPaddr_t	NetNtpServerIP;			/* the ip address to NTP 	*/
-extern int NetTimeOffset;			/* offset time from UTC		*/
 #endif
 
 /* Initialize the network adapter */

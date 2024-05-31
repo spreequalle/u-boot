@@ -25,7 +25,7 @@
 #include <command.h>
 #include <net.h>
 
-#if (CONFIG_COMMANDS & CFG_CMD_NET) && defined(CONFIG_NET_MULTI)
+#if (CONFIG_COMMANDS & CFG_CMD_NET)
 
 #ifdef CFG_GT_6426x
 extern int gt6426x_eth_initialize(bd_t *bis);
@@ -52,9 +52,26 @@ extern int rtl8139_initialize(bd_t*);
 extern int rtl8169_initialize(bd_t*);
 extern int scc_initialize(bd_t*);
 extern int skge_initialize(bd_t*);
-extern int tsec_initialize(bd_t*, int, char *);
+extern int tsec_initialize(bd_t*, int);
+extern int rt2880_eth_initialize(bd_t *bis);
 
 static struct eth_device *eth_devices, *eth_current;
+static char rt2880_gmac1_mac[]=CONFIG_ETHADDR;
+
+typedef struct {
+	char hw_ver[4];
+	char lan_mac[18];
+	char wan_mac[18];
+	char domain[5];
+} system_info;	// as same as apps/ralink_apps/public_util.h
+
+#if defined (CFG_ENV_IS_IN_SPI)
+#define SYS_ADDR  ((CFG_BOOTLOADER_SIZE + CFG_FACTORY_SIZE) - sizeof(system_info) - 2)
+#else		// defined (CFG_ENV_IS_IN_SPI)
+#define SYS_ADDR	((CFG_ENV_ADDR + CFG_FACTORY_SIZE) - sizeof(system_info) - 2)
+#endif	// defined (CFG_ENV_IS_IN_SPI)
+#define NULL_MAC1 "00:00:00:00:00:00"
+#define NULL_MAC2 "FF:FF:FF:FF:FF:FF"
 
 struct eth_device *eth_get_dev(void)
 {
@@ -137,46 +154,34 @@ int eth_initialize(bd_t *bis)
 	inca_switch_initialize(bis);
 #endif
 #ifdef CONFIG_PLB2800_ETHER
+
 	plb2800_eth_initialize(bis);
 #endif
 #ifdef SCC_ENET
+kk
 	scc_initialize(bis);
 #endif
 #if defined(FEC_ENET) || defined(CONFIG_ETHER_ON_FCC)
+ll
 	fec_initialize(bis);
 #endif
 #if defined(CONFIG_MPC5xxx_FEC)
 	mpc5xxx_fec_initialize(bis);
 #endif
-#if defined(CONFIG_MPC8220_FEC)
+#if defined(CONFIG_MPC8220)
 	mpc8220_fec_initialize(bis);
 #endif
 #if defined(CONFIG_SK98)
 	skge_initialize(bis);
 #endif
 #if defined(CONFIG_MPC85XX_TSEC1)
-	tsec_initialize(bis, 0, CONFIG_MPC85XX_TSEC1_NAME);
-#elif defined(CONFIG_MPC83XX_TSEC1)
-	tsec_initialize(bis, 0, CONFIG_MPC83XX_TSEC1_NAME);
+	tsec_initialize(bis, 0);
 #endif
 #if defined(CONFIG_MPC85XX_TSEC2)
-	tsec_initialize(bis, 1, CONFIG_MPC85XX_TSEC2_NAME);
-#elif defined(CONFIG_MPC83XX_TSEC2)
-	tsec_initialize(bis, 1, CONFIG_MPC83XX_TSEC2_NAME);
+	tsec_initialize(bis, 1);
 #endif
 #if defined(CONFIG_MPC85XX_FEC)
-	tsec_initialize(bis, 2, CONFIG_MPC85XX_FEC_NAME);
-#else
-#    if defined(CONFIG_MPC85XX_TSEC3)
-	tsec_initialize(bis, 2, CONFIG_MPC85XX_TSEC3_NAME);
-#    elif defined(CONFIG_MPC83XX_TSEC3)
-	tsec_initialize(bis, 2, CONFIG_MPC83XX_TSEC3_NAME);
-#    endif
-#    if defined(CONFIG_MPC85XX_TSEC4)
-	tsec_initialize(bis, 3, CONFIG_MPC85XX_TSEC4_NAME);
-#    elif defined(CONFIG_MPC83XX_TSEC4)
-	tsec_initialize(bis, 3, CONFIG_MPC83XX_TSEC4_NAME);
-#    endif
+	tsec_initialize(bis, 2);
 #endif
 #if defined(CONFIG_AU1X00)
 	au1x00_enet_initialize(bis);
@@ -212,6 +217,10 @@ int eth_initialize(bd_t *bis)
 	rtl8169_initialize(bis);
 #endif
 
+#if defined(CONFIG_RT2880_ETH)
+	rt2880_eth_initialize(bis);
+#endif
+
 	if (!eth_devices) {
 		puts ("No ethernet found.\n");
 	} else {
@@ -222,7 +231,7 @@ int eth_initialize(bd_t *bis)
 			if (eth_number)
 				puts (", ");
 
-			printf("%s", dev->name);
+			//printf("%s", dev->name);
 
 			if (ethprime && strcmp (dev->name, ethprime) == 0) {
 				eth_current = dev;
@@ -231,13 +240,48 @@ int eth_initialize(bd_t *bis)
 
 			sprintf(enetvar, eth_number ? "eth%daddr" : "ethaddr", eth_number);
 			tmp = getenv (enetvar);
+			//kaiker ++
+			
+			{		
+				system_info *sys_info;
+				unsigned long sys_part;
+				int check_format = 0;
+				
+				memset(sys_info, 0, sizeof(system_info));
+				
+#if defined (CFG_ENV_IS_IN_SPI)
+				sys_part = (unsigned long)SYS_ADDR;
+				raspi_read(sys_info, sys_part, sizeof(system_info));
+#else		// defined (CFG_ENV_IS_IN_SPI)
+				sys_info = (system_info *)SYS_ADDR;	// get LAN MAC address from Flash			
+#endif	// defined (CFG_ENV_IS_IN_SPI)
 
+				for (i = 2; i < 18; i += 3){
+					if (sys_info->lan_mac[i] == ':'){
+						check_format++;
+					}
+				}
+								
+				if (check_format == 5){	// if it's a correct format
+					if (strcmp(sys_info->lan_mac, NULL_MAC1) != 0 && strcmp(sys_info->lan_mac, NULL_MAC2) != 0){
+						tmp = &sys_info->lan_mac;					
+					}else{
+						tmp = rt2880_gmac1_mac;
+					}
+				}else{
+					tmp = rt2880_gmac1_mac;
+				}	
+								
+			}
+			
+			printf("\n enetvar=%s,Eth addr:%s\n ",enetvar, tmp);
 			for (i=0; i<6; i++) {
 				env_enetaddr[i] = tmp ? simple_strtoul(tmp, &end, 16) : 0;
+				printf("%02X:",env_enetaddr[i]);
 				if (tmp)
 					tmp = (*end) ? end+1 : end;
 			}
-
+			printf("\n");
 			if (memcmp(env_enetaddr, "\0\0\0\0\0\0", 6)) {
 				if (memcmp(dev->enetaddr, "\0\0\0\0\0\0", 6) &&
 				    memcmp(dev->enetaddr, env_enetaddr, 6))
@@ -272,8 +316,8 @@ int eth_initialize(bd_t *bis)
 		} else
 			setenv("ethact", NULL);
 #endif
-
-		putc ('\n');
+		//printf("\n eth_current->name = %s\n",eth_current->name);
+		printf("\n");
 	}
 
 	return eth_number;
@@ -327,10 +371,12 @@ int eth_init(bd_t *bis)
 
 		if (eth_current->init(eth_current, bis)) {
 			eth_current->state = ETH_STATE_ACTIVE;
-
+			printf("\n ETH_STATE_ACTIVE!! \n");
 			return 1;
 		}
-		debug  ("FAIL\n");
+		printf  ("FAIL\n");
+        //kaiker
+		return (-1);
 
 		eth_try_another(0);
 	} while (old_current != eth_current);
@@ -384,11 +430,11 @@ void eth_try_another(int first_restart)
 		if (act == NULL || strcmp(act, eth_current->name) != 0)
 			setenv("ethact", eth_current->name);
 	}
-#endif
 
 	if (first_failed == eth_current) {
 		NetRestartWrap = 1;
 	}
+#endif
 }
 
 #ifdef CONFIG_NET_MULTI

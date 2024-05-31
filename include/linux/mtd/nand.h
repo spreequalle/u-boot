@@ -5,7 +5,7 @@
  *                     Steven J. Hill <sjhill@cotw.com>
  *		       Thomas Gleixner <gleixner@autronix.de>
  *
- * $Id: nand.h,v 1.7 2003/07/24 23:30:46 a0384864 Exp $
+ * $Id: nand.h,v 1.1.1.1 2006-05-22 09:48:46 yjlin Exp $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -122,7 +122,6 @@ struct nand_chip {
 	uint oobblock;  /* Size of OOB blocks (e.g. 512) */
 	uint oobsize;   /* Amount of OOB data per block (e.g. 16) */
 	uint eccsize;
-	int bus16;
 };
 
 /*
@@ -166,7 +165,6 @@ struct nand_flash_dev {
 	char page256;
 	char pageadrlen;
 	unsigned long erasesize;
-	int bus16;
 };
 
 /*

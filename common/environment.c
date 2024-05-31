@@ -21,12 +21,7 @@
  * MA 02111-1307 USA
  */
 
-#ifndef __ASSEMBLY__
-#define	__ASSEMBLY__			/* Dirty trick to get only #defines	*/
-#endif
-#define	__ASM_STUB_PROCESSOR_H__	/* don't include asm/processor.		*/
 #include <config.h>
-#undef	__ASSEMBLY__
 #include <environment.h>
 
 /*
@@ -142,10 +137,10 @@ env_t environment __PPCENV__ = {
 	"ethprime="	CONFIG_ETHPRIME			"\0"
 #endif
 #ifdef	CONFIG_IPADDR
-	"ipaddr="	MK_STR(CONFIG_IPADDR)		"\0"
+	"ipaddr=" MK_STR(CONFIG_IPADDR)		"\0"
 #endif
 #ifdef	CONFIG_SERVERIP
-	"serverip="	MK_STR(CONFIG_SERVERIP)		"\0"
+	"serverip=" MK_STR(CONFIG_SERVERIP)		"\0"
 #endif
 #ifdef	CFG_AUTOLOAD
 	"autoload="	CFG_AUTOLOAD			"\0"
